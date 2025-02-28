@@ -18,7 +18,7 @@ public class Ore : MonoBehaviour
             for (var y = 0; y < height; y++)
             {
                 var spawnPosition = startPosition + new Vector3(x, y, 0);
-                Instantiate(cellPrefab, spawnPosition, Quaternion.identity);
+                Instantiate(cellPrefab, spawnPosition, Quaternion.identity, transform);
             }
         }
     }
