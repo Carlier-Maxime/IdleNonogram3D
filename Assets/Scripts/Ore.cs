@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Runtime.CompilerServices;
+using UnityEngine;
 
 public class Ore : MonoBehaviour
 {
@@ -12,7 +13,8 @@ public class Ore : MonoBehaviour
     private void Start()
     {
         if (!cellPrefab.GetComponent<Cell>()) Debug.LogError("The Prefab used not content a component Cell.");
-        var startPosition = transform.position - new Vector3(width / 2f, height / 2f, 0);
+
+        var startPosition = transform.position - new Vector3(ShiftOf(width), ShiftOf(height), 0);
         for (var x = 0; x < width; x++)
         {
             for (var y = 0; y < height; y++)
@@ -21,5 +23,10 @@ public class Ore : MonoBehaviour
                 Instantiate(cellPrefab, spawnPosition, Quaternion.identity, transform);
             }
         }
+        return;
+
+        // ReSharper disable once PossibleLossOfFraction
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static float ShiftOf(int x) => x/2 - ((x&1)==0 ? 0.5f : 0f);
     }
 }
