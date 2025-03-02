@@ -515,12 +515,20 @@ PrefabInstance:
       value: OrePrefab
       objectReference: {fileID: 0}
     - target: {fileID: 3652239444829483354, guid: d335c423801f876458f4cedbca3a95a7, type: 3}
+      propertyPath: depth
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3652239444829483354, guid: d335c423801f876458f4cedbca3a95a7, type: 3}
       propertyPath: width
       value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3652239444829483354, guid: d335c423801f876458f4cedbca3a95a7, type: 3}
       propertyPath: height
       value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3652239444829483354, guid: d335c423801f876458f4cedbca3a95a7, type: 3}
+      propertyPath: density
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 3652239444829483354, guid: d335c423801f876458f4cedbca3a95a7, type: 3}
       propertyPath: cellPrefab
