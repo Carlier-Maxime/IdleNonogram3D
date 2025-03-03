@@ -4,7 +4,7 @@ using UnityEngine;
 public class RotateBySwipe : MonoBehaviour
 {
     [SerializeField]
-    private float rotationSpeed = 1f;
+    private float rotationSpeed = 45f;
     [SerializeField]
     private float snapAngle = 90f;
     [SerializeField]

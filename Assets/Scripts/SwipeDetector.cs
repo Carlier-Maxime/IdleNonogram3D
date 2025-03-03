@@ -13,7 +13,7 @@ public class SwipeDetector : MonoBehaviour
     [SerializeField]
     private InputActionReference swipeClickAction;
     [SerializeField]
-    private float swipeThreshold = 50;
+    private float swipeThreshold = 0.05f;
     private Vector2 _startPosition = Vector2.zero;
     private Vector2 _direction = Vector2.zero;
     private Vector2 _delta = Vector2.zero;
@@ -43,6 +43,8 @@ public class SwipeDetector : MonoBehaviour
     private void SwipePerformed(InputAction.CallbackContext obj)
     {
         var direction = swipePosAction.action.ReadValue<Vector2>() - _startPosition;
+        direction.x /= Screen.width;
+        direction.y /= Screen.height;
         if (direction.magnitude < swipeThreshold) return;
         if (_direction == Vector2.zero)
         {
