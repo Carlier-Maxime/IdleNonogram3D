@@ -14,7 +14,7 @@ public class RotateBySwipe : MonoBehaviour
         
     private void Start()
     {
-        var swipeDetector = SwipeDetector.Instance;
+        var swipeDetector = Player.P1.swipeDetector;
         swipeDetector.OnSwipeStarted += RotateStarted;
         swipeDetector.OnSwipePerformed += RotatePerformed;
         swipeDetector.OnSwipeCanceled += RotateCanceled;

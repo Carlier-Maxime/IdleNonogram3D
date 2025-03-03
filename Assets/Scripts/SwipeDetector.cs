@@ -3,7 +3,6 @@ using UnityEngine.InputSystem;
 
 public class SwipeDetector : MonoBehaviour
 {
-    public static SwipeDetector Instance;
     public delegate void Swipe(Vector2 startPos, Vector2 direction, Vector2 delta);
     public event Swipe OnSwipeStarted;
     public event Swipe OnSwipePerformed;
@@ -23,7 +22,6 @@ public class SwipeDetector : MonoBehaviour
         swipeClickAction.action.started += SwipeStarted;
         swipeClickAction.action.canceled += SwipeCanceled;
         swipeClickAction.action.Enable();
-        Instance = this;
     }
 
     private void OnDisable()
@@ -31,7 +29,6 @@ public class SwipeDetector : MonoBehaviour
         swipeClickAction.action.Disable();
         swipeClickAction.action.started -= SwipeStarted;
         swipeClickAction.action.canceled -= SwipeCanceled;
-        Instance = null;
     }
     
     private void SwipeStarted(InputAction.CallbackContext obj)
