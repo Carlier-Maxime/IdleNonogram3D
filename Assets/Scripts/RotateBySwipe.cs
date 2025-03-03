@@ -4,7 +4,7 @@ using UnityEngine;
 public class RotateBySwipe : MonoBehaviour
 {
     [SerializeField]
-    private float rotationSpeed = 1f;
+    private float rotationSpeed = 45f;
     [SerializeField]
     private float snapAngle = 90f;
     [SerializeField]
@@ -14,7 +14,7 @@ public class RotateBySwipe : MonoBehaviour
         
     private void Start()
     {
-        var swipeDetector = SwipeDetector.Instance;
+        var swipeDetector = Player.P1.swipeDetector;
         swipeDetector.OnSwipeStarted += RotateStarted;
         swipeDetector.OnSwipePerformed += RotatePerformed;
         swipeDetector.OnSwipeCanceled += RotateCanceled;

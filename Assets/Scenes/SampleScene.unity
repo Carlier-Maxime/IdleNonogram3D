@@ -132,6 +132,7 @@ GameObject:
   - component: {fileID: 330585544}
   - component: {fileID: 330585547}
   - component: {fileID: 330585548}
+  - component: {fileID: 330585549}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -271,7 +272,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   swipePosAction: {fileID: -1654692200621890270, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   swipeClickAction: {fileID: 3290848400641293257, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  swipeThreshold: 50
+  swipeThreshold: 0.025
+--- !u!114 &330585549
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 330585543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e4b0fee06fe45eaad8fffad0e8909e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  swipeDetector: {fileID: 330585548}
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -410,7 +424,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 508489de154d43608d4bb7693196c791, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rotationSpeed: 0.5
+  rotationSpeed: 90
   snapAngle: 90
   snapDuration: 0.2
 --- !u!1 &832575517
