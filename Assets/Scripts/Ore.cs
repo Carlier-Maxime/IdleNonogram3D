@@ -14,11 +14,13 @@ public class Ore : MonoBehaviour
     private int depth = 5;
     [SerializeField]
     private float density = 0.5f;
+    private Cell[,,] _cells;
 
     private void Start()
     {
         if (!cellPrefab.GetComponent<Cell>()) Debug.LogError("The Prefab used not content a component Cell.");
-
+    
+        _cells = new Cell[width, height, depth];
         var seed = UnityEngine.Random.Range(0, 100000);
         Debug.Log("Ore seed : "+seed);
         var seedOffset = new float3(seed*0.01f, seed*0.01f, seed*0.01f);
@@ -29,9 +31,9 @@ public class Ore : MonoBehaviour
             {
                 for (var z = 0; z < depth; z++)
                 {
-                    if ((noise.snoise(seedOffset + new float3(x, y, z))+1)*0.5f > density) continue;
                     var spawnPosition = startPosition + new Vector3(x, y, z);
-                    Instantiate(cellPrefab, spawnPosition, Quaternion.identity, transform);
+                    _cells[x,y,z] = Instantiate(cellPrefab, spawnPosition, Quaternion.identity, transform).GetComponent<Cell>();
+                    _cells[x,y,z].SetPure((noise.snoise(seedOffset + new float3(x, y, z))+1)*0.5f < density);
                 }
             }
         }
