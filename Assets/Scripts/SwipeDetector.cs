@@ -8,8 +8,6 @@ public class SwipeDetector : MonoBehaviour
     public event Swipe OnSwipePerformed;
     public event Swipe OnSwipeCanceled;
     [SerializeField]
-    private InputActionReference swipePosAction;
-    [SerializeField]
     private InputActionReference swipeClickAction;
     [SerializeField]
     private float swipeThreshold = 0.05f;
@@ -33,13 +31,13 @@ public class SwipeDetector : MonoBehaviour
     
     private void SwipeStarted(InputAction.CallbackContext obj)
     {
-        _startPosition = Utils.NormalizeSreenCoords(swipePosAction.action.ReadValue<Vector2>());
-        swipePosAction.action.performed += SwipePerformed;
+        _startPosition = Utils.NormalizeSreenCoords(Player.P1.posAction.action.ReadValue<Vector2>());
+        Player.P1.posAction.action.performed += SwipePerformed;
     }
     
     private void SwipePerformed(InputAction.CallbackContext obj)
     {
-        var direction = Utils.NormalizeSreenCoords(swipePosAction.action.ReadValue<Vector2>()) - _startPosition;
+        var direction = Utils.NormalizeSreenCoords(Player.P1.posAction.action.ReadValue<Vector2>()) - _startPosition;
         if (direction.magnitude < swipeThreshold) return;
         if (_direction == Vector2.zero)
         {
@@ -54,7 +52,7 @@ public class SwipeDetector : MonoBehaviour
     private void SwipeCanceled(InputAction.CallbackContext obj)
     {
         OnSwipeCanceled?.Invoke(_startPosition, _direction, _delta);
-        swipePosAction.action.performed -= SwipePerformed;
+        Player.P1.posAction.action.performed -= SwipePerformed;
         _startPosition = Vector2.zero;
         _direction = Vector2.zero;
         _delta = Vector2.zero;

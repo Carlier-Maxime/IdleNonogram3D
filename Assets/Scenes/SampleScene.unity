@@ -133,6 +133,7 @@ GameObject:
   - component: {fileID: 330585547}
   - component: {fileID: 330585548}
   - component: {fileID: 330585549}
+  - component: {fileID: 330585550}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -270,7 +271,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5ea1d621412493fb09e5c0ffbaafdf8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  swipePosAction: {fileID: -1654692200621890270, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   swipeClickAction: {fileID: 3290848400641293257, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   swipeThreshold: 0.025
 --- !u!114 &330585549
@@ -286,6 +286,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   swipeDetector: {fileID: 330585548}
+  posAction: {fileID: -1654692200621890270, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  clickDetector: {fileID: 330585550}
+--- !u!114 &330585550
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 330585543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58df81f34093413a92a3672675fe7d4e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  clickAction: {fileID: 3290848400641293257, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  threshold: 0.0025
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
