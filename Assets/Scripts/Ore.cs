@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using TMPro;
 using Unity.Mathematics;
@@ -60,6 +61,8 @@ public class Ore : MonoBehaviour
         ComputeFaceIndices();
         DrawGrid(startPosition);
         ShowFaceIndices(ref _north[0]);
+        var rotateComponent = GetComponent<RotateBySwipe>();
+        if (rotateComponent) rotateComponent.OnRotateFinish += OnRotateFinish;
         return;
 
         // ReSharper disable once PossibleLossOfFraction
@@ -70,7 +73,7 @@ public class Ore : MonoBehaviour
     private void GenCells(Vector3 startPosition)
     {
         _cells = new Cell[width, height, depth];
-        var seed = UnityEngine.Random.Range(0, 100000);
+        var seed = UnityEngine.Random.Range(0, 100000); // 60198
         Debug.Log("Ore seed : "+seed);
         var seedOffset = new float3(seed*0.01f, seed*0.01f, seed*0.01f);
         for (var x = 0; x < width; x++)
@@ -212,7 +215,7 @@ public class Ore : MonoBehaviour
         for (var x = 0; x < width; ++x)
         {
             ref var column = ref face.GetColumn(x);
-            _columnTMP[x].text = string.Join('\n', column);
+            _columnTMP[x].text = string.Join('\n', column.AsEnumerable()!.Reverse());
         }
 
         for (var y = 0; y < height; ++y)
@@ -220,5 +223,34 @@ public class Ore : MonoBehaviour
             ref var line = ref face.GetLine(y);
             _lineTMP[y].text = string.Join(' ', line);
         }
+    }
+
+    private void OnRotateFinish()
+    {
+        var cameraDir = (Player.P1.transform.position - transform.position).normalized;
+        var localNormals = new[] {
+            Vector3.back,
+            Vector3.forward,
+            Vector3.right,
+            Vector3.left,
+            Vector3.up,
+            Vector3.down
+        };
+        var faceNames = new[] { "North", "Sud", "Est", "West", "Up", "Down" };
+        var faces = new[] { _north, _north, _west, _west, _up, _up};
+        
+        var maxDot = -Mathf.Infinity;
+        var bestFace = -1;
+        for (var i = 0; i < localNormals.Length; i++)
+        {
+            var worldNormal = transform.TransformDirection(localNormals[i]);
+            var dot = Vector3.Dot(worldNormal, cameraDir);
+            if (dot <= maxDot) continue;
+            maxDot = dot;
+            bestFace = i;
+        }
+    
+        Debug.Log("Face actuelle : " + faceNames[bestFace] + " rotation : "+transform.rotation.eulerAngles);
+        //ShowFaceIndices(ref faces[bestFace][0]);
     }
 }

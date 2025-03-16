@@ -11,6 +11,8 @@ public class RotateBySwipe : MonoBehaviour
     private float snapDuration = 0.2f;
     private Vector3 _axis = Vector3.zero;
     private Coroutine _snappingCoroutine;
+    public delegate void ActionDelegate();
+    public event ActionDelegate OnRotateFinish;
         
     private void Start()
     {
@@ -63,6 +65,7 @@ public class RotateBySwipe : MonoBehaviour
             yield return null;
         }
         
-        transform.rotation = targetRotation; 
+        transform.rotation = targetRotation;
+        OnRotateFinish?.Invoke();
     }
 }
