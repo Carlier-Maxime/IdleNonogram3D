@@ -1,6 +1,31 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Unity.Mathematics;
 using UnityEngine;
+
+public class FaceIndices
+{
+    public FaceIndices(int nbLine, int nbColumn)
+    {
+        _lines = new List<int>[nbLine];
+        for (var i = 0; i < nbLine; i++) _lines[i] = new List<int>();
+        _columns = new List<int>[nbColumn];
+        for (var i = 0; i < nbColumn; i++) _columns[i] = new List<int>();
+    }
+    private List<int>[] _lines;
+    private List<int>[] _columns;
+
+    public ref List<int> GetLine(int i)
+    {
+        return ref _lines[i];
+    }
+    
+    public ref List<int> GetColumn(int i)
+    {
+        return ref _columns[i];
+    }
+}
 
 public class Ore : MonoBehaviour
 {
@@ -17,16 +42,32 @@ public class Ore : MonoBehaviour
     [SerializeField]
     private float density = 0.5f;
     private Cell[,,] _cells;
+    private FaceIndices[] _north;
+    private FaceIndices[] _west;
+    private FaceIndices[] _up;
 
     private void Start()
     {
         if (!cellPrefab.GetComponent<Cell>()) Debug.LogError("The Prefab used not content a component Cell.");
-    
+        
+        var startPosition = transform.position - new Vector3(ShiftOf(width), ShiftOf(height), ShiftOf(depth));
+        GenCells(startPosition);
+        InitializeFaceIndices();
+        ComputeFaceIndices();
+        DrawGrid(startPosition);
+        return;
+
+        // ReSharper disable once PossibleLossOfFraction
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static float ShiftOf(int x) => x/2 - ((x&1)==0 ? 0.5f : 0f);
+    }
+
+    private void GenCells(Vector3 startPosition)
+    {
         _cells = new Cell[width, height, depth];
         var seed = UnityEngine.Random.Range(0, 100000);
         Debug.Log("Ore seed : "+seed);
         var seedOffset = new float3(seed*0.01f, seed*0.01f, seed*0.01f);
-        var startPosition = transform.position - new Vector3(ShiftOf(width), ShiftOf(height), ShiftOf(depth));
         for (var x = 0; x < width; x++)
         {
             for (var y = 0; y < height; y++)
@@ -39,6 +80,67 @@ public class Ore : MonoBehaviour
                 }
             }
         }
+    }
+
+    private void InitializeFaceIndices()
+    {
+        _north = new FaceIndices[depth];
+        for (var i = 0; i < depth; ++i) _north[i] = new FaceIndices(height, width);
+        _west = new FaceIndices[width];
+        for (var i = 0; i < width; ++i) _west[i] = new FaceIndices(height, depth);
+        _up = new FaceIndices[height];
+        for (var i = 0; i < height; ++i) _up[i] = new FaceIndices(depth, width);
+    }
+
+    private void ComputeFaceIndices()
+    {
+        for (var z = 0; z < depth; ++z)
+        {
+            var finalZ = z;
+            ComputeIndicesLineOrColumn(height, width, (minor, major) => _cells[minor, major, finalZ].IsPure(), ref _north[z], false);
+            ComputeIndicesLineOrColumn(width, height, (minor, major) => _cells[major, minor, finalZ].IsPure(), ref _north[z], true);
+        }
+
+        for (var x = 0; x < width; ++x)
+        {
+            var finalX = x;
+            ComputeIndicesLineOrColumn(height, depth, (minor, major) => _cells[finalX, minor, major].IsPure(), ref _west[x], false);
+            ComputeIndicesLineOrColumn(depth, height, (minor, major) => _cells[finalX, major, minor ].IsPure(), ref _west[x], true);
+        }
+
+        for (var y = 0; y < height; y++)
+        {
+            var finalY = y;
+            ComputeIndicesLineOrColumn(depth, width, (minor, major) => _cells[minor, finalY, major].IsPure(), ref _up[y], false);
+            ComputeIndicesLineOrColumn( width, depth, (minor, major) => _cells[major, finalY, minor].IsPure(), ref _up[y], true);
+        }
+    }
+
+    private void ComputeIndicesLineOrColumn(int majorSize, int minorSize, Func<int, int, bool> isPure, ref FaceIndices face, bool useColumn)
+    {
+        for (var major = 0; major < majorSize; ++major)
+        {
+            ref var line = ref useColumn ? ref face.GetColumn(major) : ref face.GetLine(major);
+            var i = -1;
+            var oldPure = false;
+            for (var minor = 0; minor < minorSize; minor++)
+            {
+                var newPure = isPure(minor, major);
+                if (newPure)
+                {
+                    if (!oldPure)
+                    {
+                        ++i;
+                        line.Add(1);
+                    } else line[i]++;
+                }
+                oldPure = newPure;
+            }
+        }
+    }
+
+    private void DrawGrid(Vector3 startPosition)
+    {
         var lineRenderer = gameObject.AddComponent<LineRenderer>();
         lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
         lineRenderer.colorGradient = new Gradient
@@ -72,10 +174,5 @@ public class Ore : MonoBehaviour
                 lineRenderer.SetPosition(i, startPosition + new Vector3(posX, y-0.5f, -0.5f));
             }
         }
-        return;
-
-        // ReSharper disable once PossibleLossOfFraction
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static float ShiftOf(int x) => x/2 - ((x&1)==0 ? 0.5f : 0f);
     }
 }
