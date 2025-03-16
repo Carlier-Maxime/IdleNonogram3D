@@ -253,4 +253,19 @@ public class Ore : MonoBehaviour
         Debug.Log("Face actuelle : " + faceNames[bestFace] + " rotation : "+transform.rotation.eulerAngles);
         //ShowFaceIndices(ref faces[bestFace][0]);
     }
+
+    public void DestroyAllCells()
+    {
+        for (var x = 0; x < width; ++x)
+        {
+            for (var y = 0; y < height; ++y)
+            {
+                for (var z = 0; z < depth; ++z)
+                {
+                    if (_cells[x, y, z] == null) continue;
+                    _cells[x, y, z].DestroyCell(false);
+                }
+            }
+        }
+    }
 }

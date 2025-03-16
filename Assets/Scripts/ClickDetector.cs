@@ -45,7 +45,7 @@ public class ClickDetector : MonoBehaviour
         if (!Physics.Raycast(ray, out hit)) return;
         var cell = hit.collider.GetComponentInParent<Cell>();
         if (!cell) return;
-        cell.Destroy();
+        cell.DestroyCell(true);
     }
 
     private void OnDisable()

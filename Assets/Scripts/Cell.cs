@@ -8,7 +8,7 @@ public class Cell : MonoBehaviour
     public void SetPure(bool isPure)
     {
         _isPure = isPure;
-        transform.localScale *= _isPure ? 1f : 0.5f;
+        transform.localScale *= _isPure ? 1f : 0.8f;
     }
 
     public bool IsPure()
@@ -16,7 +16,7 @@ public class Cell : MonoBehaviour
         return _isPure;
     }
 
-    public void Destroy()
+    public void DestroyCell(bool checkPur)
     {
         if (particleBreakPrefab)
         {
@@ -24,5 +24,8 @@ public class Cell : MonoBehaviour
             Destroy(effect, 0.5f);
         }
         Destroy(gameObject);
+        if (!_isPure || !checkPur) return;
+        var ore = GetComponentInParent<Ore>();
+        ore.DestroyAllCells();
     }
 }
