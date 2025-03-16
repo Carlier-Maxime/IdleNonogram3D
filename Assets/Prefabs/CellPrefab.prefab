@@ -153,3 +153,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7dd54d535e394de285d2f2200fad7258, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  particleBreakPrefab: {fileID: 2998830133978203100, guid: 7447056e807c1ed48a4fb298199e440e, type: 3}
