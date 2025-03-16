@@ -31,13 +31,14 @@ public class SwipeDetector : MonoBehaviour
     
     private void SwipeStarted(InputAction.CallbackContext obj)
     {
-        _startPosition = Utils.NormalizeSreenCoords(Player.P1.posAction.action.ReadValue<Vector2>());
         Player.P1.posAction.action.performed += SwipePerformed;
     }
     
     private void SwipePerformed(InputAction.CallbackContext obj)
     {
-        var direction = Utils.NormalizeSreenCoords(Player.P1.posAction.action.ReadValue<Vector2>()) - _startPosition;
+        var pos = Player.P1.posAction.action.ReadValue<Vector2>();
+        if (_startPosition == Vector2.zero) _startPosition = Utils.NormalizeSreenCoords(pos);
+        var direction = Utils.NormalizeSreenCoords(pos) - _startPosition;
         if (direction.magnitude < swipeThreshold) return;
         if (_direction == Vector2.zero)
         {

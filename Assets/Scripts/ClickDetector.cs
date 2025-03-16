@@ -18,14 +18,28 @@ public class ClickDetector : MonoBehaviour
 
     private void OnClickStart(InputAction.CallbackContext obj)
     {
+        Player.P1.posAction.action.performed += OnPerformStartPos;
+    }
+
+    private void OnPerformStartPos(InputAction.CallbackContext obj)
+    {
         _startPos = Utils.NormalizeSreenCoords(Player.P1.posAction.action.ReadValue<Vector2>());
+        Player.P1.posAction.action.performed -= OnPerformStartPos;
     }
 
     private void OnClickPerformed(InputAction.CallbackContext obj)
     {
-        var pos = Utils.NormalizeSreenCoords(Player.P1.posAction.action.ReadValue<Vector2>());
-        if ((pos-_startPos).magnitude > threshold) return;
+        Player.P1.posAction.action.performed -= OnPerformStartPos;
+        var rawPos = Player.P1.posAction.action.ReadValue<Vector2>();
+        if (_startPos == Vector2.zero) _startPos = Utils.NormalizeSreenCoords(rawPos);
+        var pos = Utils.NormalizeSreenCoords(rawPos);
+        if ((pos - _startPos).magnitude > threshold)
+        {
+            _startPos = Vector2.zero;
+            return;
+        }
         var screenPos = Utils.UnNormalizeScreenCoords(_startPos);
+        _startPos = Vector2.zero;
         var ray = GetComponent<Camera>().ScreenPointToRay(screenPos);
         RaycastHit hit;
         if (!Physics.Raycast(ray, out hit)) return;
