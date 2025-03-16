@@ -59,6 +59,7 @@ public class Ore : MonoBehaviour
         InitializeTMP(startPosition);
         ComputeFaceIndices();
         DrawGrid(startPosition);
+        ShowFaceIndices(ref _north[0]);
         return;
 
         // ReSharper disable once PossibleLossOfFraction
@@ -203,6 +204,21 @@ public class Ore : MonoBehaviour
                 var posX = ((y&1) == 0 ? 1-x : x)*height - 0.5f;
                 lineRenderer.SetPosition(i, startPosition + new Vector3(posX, y-0.5f, -0.5f));
             }
+        }
+    }
+
+    private void ShowFaceIndices(ref FaceIndices face)
+    {
+        for (var x = 0; x < width; ++x)
+        {
+            ref var column = ref face.GetColumn(x);
+            _columnTMP[x].text = string.Join('\n', column);
+        }
+
+        for (var y = 0; y < height; ++y)
+        {
+            ref var line = ref face.GetLine(y);
+            _lineTMP[y].text = string.Join(' ', line);
         }
     }
 }
