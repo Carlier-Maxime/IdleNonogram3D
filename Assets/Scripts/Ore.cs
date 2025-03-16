@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -45,6 +46,8 @@ public class Ore : MonoBehaviour
     private FaceIndices[] _north;
     private FaceIndices[] _west;
     private FaceIndices[] _up;
+    private TextMeshPro[] _lineTMP;
+    private TextMeshPro[] _columnTMP;
 
     private void Start()
     {
@@ -53,6 +56,7 @@ public class Ore : MonoBehaviour
         var startPosition = transform.position - new Vector3(ShiftOf(width), ShiftOf(height), ShiftOf(depth));
         GenCells(startPosition);
         InitializeFaceIndices();
+        InitializeTMP(startPosition);
         ComputeFaceIndices();
         DrawGrid(startPosition);
         return;
@@ -90,6 +94,32 @@ public class Ore : MonoBehaviour
         for (var i = 0; i < width; ++i) _west[i] = new FaceIndices(height, depth);
         _up = new FaceIndices[height];
         for (var i = 0; i < height; ++i) _up[i] = new FaceIndices(depth, width);
+    }
+
+    private void InitializeTMP(Vector3 startPosition)
+    {
+        _lineTMP = new TextMeshPro[height];
+        for (var i = 0; i < height; ++i)
+        {
+            var newGameObject = new GameObject();
+            _lineTMP[i] = newGameObject.AddComponent<TextMeshPro>();
+            _lineTMP[i].transform.position = startPosition + new Vector3(-1.5f, i, -0.5f);
+            _lineTMP[i].text = "X X X";
+            _lineTMP[i].alignment = TextAlignmentOptions.Center;
+            _lineTMP[i].fontSize = 5;
+            _lineTMP[i].color = Color.blue;
+        }
+        _columnTMP = new TextMeshPro[width];
+        for (var i = 0; i < height; ++i)
+        {
+            var newGameObject = new GameObject();
+            _columnTMP[i] = newGameObject.AddComponent<TextMeshPro>();
+            _columnTMP[i].transform.position = startPosition + new Vector3(i, height+0.75f, -0.5f);
+            _columnTMP[i].text = "X\nX\nX";
+            _columnTMP[i].alignment = TextAlignmentOptions.Center;
+            _columnTMP[i].fontSize = 5;
+            _columnTMP[i].color = Color.blue;
+        }
     }
 
     private void ComputeFaceIndices()
