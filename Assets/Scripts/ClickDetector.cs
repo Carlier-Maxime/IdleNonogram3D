@@ -25,7 +25,13 @@ public class ClickDetector : MonoBehaviour
     {
         var pos = Utils.NormalizeSreenCoords(Player.P1.posAction.action.ReadValue<Vector2>());
         if ((pos-_startPos).magnitude > threshold) return;
-        Debug.Log("Click detected "+_startPos);
+        var screenPos = Utils.UnNormalizeScreenCoords(_startPos);
+        var ray = GetComponent<Camera>().ScreenPointToRay(screenPos);
+        RaycastHit hit;
+        if (!Physics.Raycast(ray, out hit)) return;
+        var cell = hit.collider.GetComponentInParent<Cell>();
+        if (!cell) return;
+        cell.Destroy();
     }
 
     private void OnDisable()

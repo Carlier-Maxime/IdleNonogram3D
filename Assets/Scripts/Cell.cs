@@ -8,4 +8,9 @@ public class Cell : MonoBehaviour
         _isPure = isPure;
         transform.localScale *= _isPure ? 1f : 0.25f;
     }
+
+    public void Destroy()
+    {
+        Destroy(gameObject);
+    }
 }
