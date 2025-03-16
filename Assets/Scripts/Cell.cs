@@ -8,7 +8,7 @@ public class Cell : MonoBehaviour
     public void SetPure(bool isPure)
     {
         _isPure = isPure;
-        transform.localScale *= _isPure ? 1f : 0.25f;
+        //transform.localScale *= _isPure ? 1f : 0.25f;
     }
 
     public void Destroy()

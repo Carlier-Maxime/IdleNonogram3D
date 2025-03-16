@@ -44,6 +44,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f80d057f5464a5aaf029601eb2fc802, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gridColor1: {r: 0, g: 0.9833245, b: 1, a: 0}
+  gridColor2: {r: 0, g: 0.63323593, b: 1, a: 0}
   cellPrefab: {fileID: 0}
   width: 5
   height: 5
+  depth: 5
+  density: 0.5
