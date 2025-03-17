@@ -212,18 +212,18 @@ public class Ore : MonoBehaviour
         }
     }
 
-    private void ShowFaceIndices(ref FaceIndices face)
+    private void ShowFaceIndices(ref FaceIndices face, bool inverseColumnOrder = false, bool reverseColumn = false, bool inverseLineOrder = false, bool reverseLine = false)
     {
         for (var x = 0; x < width; ++x)
         {
-            ref var column = ref face.GetColumn(x);
-            _columnTMP[x].text = string.Join('\n', column.AsEnumerable()!.Reverse());
+            ref var column = ref face.GetColumn(inverseColumnOrder ? width-(1+x) : x);
+            _columnTMP[x].text = string.Join('\n', reverseColumn ? column : column.AsEnumerable()!.Reverse());
         }
 
         for (var y = 0; y < height; ++y)
         {
-            ref var line = ref face.GetLine(y);
-            _lineTMP[y].text = string.Join(' ', line);
+            ref var line = ref face.GetLine(inverseLineOrder ? height-(1+y) : y);
+            _lineTMP[y].text = string.Join(' ', reverseLine ? line.AsEnumerable()!.Reverse() : line);
         }
     }
 
@@ -239,13 +239,13 @@ public class Ore : MonoBehaviour
             Vector3.down
         };
         var faceNames = new[] { "North", "Sud", "Est", "West", "Up", "Down" };
-        var faces = new[] {
-            _north[_localDepth],
-            _north[depth - (1+_localDepth)],
-            _west[width - (1+_localDepth)],
-            _west[_localDepth],
-            _down[height - (1+_localDepth)],
-            _down[_localDepth]
+        Action[] showFaces = {
+            () => ShowFaceIndices(ref _north[_localDepth]),
+            () => ShowFaceIndices(ref _north[depth - (1+_localDepth)], true, false, false, true),
+            () => ShowFaceIndices(ref _west[width - (1+_localDepth)], true, false, false, true),
+            () => ShowFaceIndices(ref _west[_localDepth]),
+            () => ShowFaceIndices(ref _down[height - (1+_localDepth)], false, true, true),
+            () => ShowFaceIndices(ref _down[_localDepth])
         };
         
         var maxDot = -Mathf.Infinity;
@@ -260,7 +260,7 @@ public class Ore : MonoBehaviour
         }
     
         Debug.Log("Face actuelle : " + faceNames[bestFace] + " rotation : "+transform.rotation.eulerAngles);
-        ShowFaceIndices(ref faces[bestFace]);
+        showFaces[bestFace]();
     }
 
     public void DestroyAllCells()
