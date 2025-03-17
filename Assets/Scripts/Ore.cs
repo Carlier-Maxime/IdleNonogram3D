@@ -46,7 +46,7 @@ public class Ore : MonoBehaviour
     private Cell[,,] _cells;
     private FaceIndices[] _north;
     private FaceIndices[] _west;
-    private FaceIndices[] _up;
+    private FaceIndices[] _down;
     private TextMeshPro[] _lineTMP;
     private TextMeshPro[] _columnTMP;
     private int _localDepth = 0;
@@ -97,8 +97,8 @@ public class Ore : MonoBehaviour
         for (var i = 0; i < depth; ++i) _north[i] = new FaceIndices(height, width);
         _west = new FaceIndices[width];
         for (var i = 0; i < width; ++i) _west[i] = new FaceIndices(height, depth);
-        _up = new FaceIndices[height];
-        for (var i = 0; i < height; ++i) _up[i] = new FaceIndices(depth, width);
+        _down = new FaceIndices[height];
+        for (var i = 0; i < height; ++i) _down[i] = new FaceIndices(depth, width);
     }
 
     private void InitializeTMP(Vector3 startPosition)
@@ -139,28 +139,29 @@ public class Ore : MonoBehaviour
         for (var x = 0; x < width; ++x)
         {
             var finalX = x;
-            ComputeIndicesLineOrColumn(height, depth, (minor, major) => _cells[finalX, minor, major].IsPure(), ref _west[x], true);
-            ComputeIndicesLineOrColumn(depth, height, (minor, major) => _cells[finalX, major, minor ].IsPure(), ref _west[x], false);
+            ComputeIndicesLineOrColumn(height, depth, (minor, major) => _cells[finalX, minor, major].IsPure(), ref _west[x], true, true);
+            ComputeIndicesLineOrColumn(depth, height, (minor, major) => _cells[finalX, major, minor ].IsPure(), ref _west[x], false, false, true);
         }
 
         for (var y = 0; y < height; y++)
         {
             var finalY = y;
-            ComputeIndicesLineOrColumn(depth, width, (minor, major) => _cells[minor, finalY, major].IsPure(), ref _up[y], false);
-            ComputeIndicesLineOrColumn( width, depth, (minor, major) => _cells[major, finalY, minor].IsPure(), ref _up[y], true);
+            ComputeIndicesLineOrColumn(depth, width, (minor, major) => _cells[minor, finalY, major].IsPure(), ref _down[y], false, true);
+            ComputeIndicesLineOrColumn( width, depth, (minor, major) => _cells[major, finalY, minor].IsPure(), ref _down[y], true, false, true);
         }
     }
 
-    private void ComputeIndicesLineOrColumn(int majorSize, int minorSize, Func<int, int, bool> isPure, ref FaceIndices face, bool useColumn)
+    private void ComputeIndicesLineOrColumn(int majorSize, int minorSize, Func<int, int, bool> isPure, ref FaceIndices face, bool useColumn, bool inverseOrder = false, bool inverseMinor = false)
     {
         for (var major = 0; major < majorSize; ++major)
         {
-            ref var line = ref useColumn ? ref face.GetColumn(major) : ref face.GetLine(major);
+            var index = inverseOrder ? majorSize - (1+major) : major;
+            ref var line = ref useColumn ? ref face.GetColumn(index) : ref face.GetLine(index);
             var i = -1;
             var oldPure = false;
             for (var minor = 0; minor < minorSize; minor++)
             {
-                var newPure = isPure(minor, major);
+                var newPure = isPure(inverseMinor ? minorSize - (1+minor) : minor, major);
                 if (newPure)
                 {
                     if (!oldPure)
@@ -243,8 +244,8 @@ public class Ore : MonoBehaviour
             _north[depth - (1+_localDepth)],
             _west[width - (1+_localDepth)],
             _west[_localDepth],
-            _up[_localDepth],
-            _up[height - (1+_localDepth)]
+            _down[height - (1+_localDepth)],
+            _down[_localDepth]
         };
         
         var maxDot = -Mathf.Infinity;
