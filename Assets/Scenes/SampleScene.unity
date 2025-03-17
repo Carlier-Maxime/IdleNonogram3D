@@ -558,7 +558,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3652239444829483354, guid: d335c423801f876458f4cedbca3a95a7, type: 3}
       propertyPath: density
-      value: 0.25
+      value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 3652239444829483354, guid: d335c423801f876458f4cedbca3a95a7, type: 3}
       propertyPath: cellPrefab
