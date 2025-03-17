@@ -196,7 +196,7 @@ public class Ore : MonoBehaviour
             {
                 var i = x*2 + y;
                 var posY = ((x&1) == 0 ? y : 1-y)*height - 0.5f;
-                lineRenderer.SetPosition(i, startPosition + new Vector3(x-0.5f, posY, -0.5f));
+                lineRenderer.SetPosition(i, startPosition + new Vector3(x-0.5f, posY, -0.6f));
             }
         }
 
@@ -207,7 +207,7 @@ public class Ore : MonoBehaviour
             {
                 var i = offsetI + y*2 + x;
                 var posX = ((y&1) == 0 ? 1-x : x)*height - 0.5f;
-                lineRenderer.SetPosition(i, startPosition + new Vector3(posX, y-0.5f, -0.5f));
+                lineRenderer.SetPosition(i, startPosition + new Vector3(posX, y-0.5f, -0.6f));
             }
         }
     }
