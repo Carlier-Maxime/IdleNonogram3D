@@ -61,7 +61,7 @@ public class Ore : MonoBehaviour
         InitializeTMP(startPosition);
         ComputeFaceIndices();
         DrawGrid(startPosition);
-        ShowFaceIndices(ref _north[0]);
+        ShowFaceIndices(ref _north[0], 0);
         var rotateComponent = GetComponent<RotateBySwipe>();
         if (rotateComponent) rotateComponent.OnRotateFinish += OnRotateFinish;
         return;
@@ -212,17 +212,40 @@ public class Ore : MonoBehaviour
         }
     }
 
-    private void ShowFaceIndices(ref FaceIndices face, bool inverseColumnOrder = false, bool reverseColumn = false, bool inverseLineOrder = false, bool reverseLine = false)
+    private void ShowFaceIndices(ref FaceIndices face, float rotZ, bool inverseColumnOrder = false, bool reverseColumn = false, bool inverseLineOrder = false, bool reverseLine = false)
     {
+        if (rotZ < 0) rotZ += 360;
+        bool shouldTranspose = false;
+        if (Math.Abs(90 - rotZ) < 1)
+        {
+            shouldTranspose = true;
+            inverseLineOrder = !inverseLineOrder;
+            reverseColumn = !reverseColumn;
+        }
+        if (Math.Abs(180-rotZ) < 1)
+        {
+            inverseColumnOrder = !inverseColumnOrder;
+            reverseColumn = !reverseColumn;
+            inverseLineOrder = !inverseLineOrder;
+            reverseLine = !reverseLine;
+        }
+        if (Math.Abs(270-rotZ) < 1)
+        {
+            shouldTranspose = true;
+            inverseColumnOrder = !inverseColumnOrder;
+            reverseLine = !reverseLine;
+        }
         for (var x = 0; x < width; ++x)
         {
-            ref var column = ref face.GetColumn(inverseColumnOrder ? width-(1+x) : x);
+            var i = inverseColumnOrder ? width - (1 + x) : x;
+            ref var column = ref shouldTranspose ? ref face.GetLine(i) : ref face.GetColumn(i);
             _columnTMP[x].text = string.Join('\n', reverseColumn ? column : column.AsEnumerable()!.Reverse());
         }
 
         for (var y = 0; y < height; ++y)
         {
-            ref var line = ref face.GetLine(inverseLineOrder ? height-(1+y) : y);
+            var i = inverseLineOrder ? height - (1 + y) : y;
+            ref var line = ref shouldTranspose ? ref face.GetColumn(i) : ref face.GetLine(i);
             _lineTMP[y].text = string.Join(' ', reverseLine ? line.AsEnumerable()!.Reverse() : line);
         }
     }
@@ -239,13 +262,13 @@ public class Ore : MonoBehaviour
             Vector3.down
         };
         var faceNames = new[] { "North", "Sud", "Est", "West", "Up", "Down" };
-        Action[] showFaces = {
-            () => ShowFaceIndices(ref _north[_localDepth]),
-            () => ShowFaceIndices(ref _north[depth - (1+_localDepth)], true, false, false, true),
-            () => ShowFaceIndices(ref _west[width - (1+_localDepth)], true, false, false, true),
-            () => ShowFaceIndices(ref _west[_localDepth]),
-            () => ShowFaceIndices(ref _down[height - (1+_localDepth)], false, true, true),
-            () => ShowFaceIndices(ref _down[_localDepth])
+        Action<float>[] showFaces = {
+            rotZ => ShowFaceIndices(ref _north[_localDepth], rotZ),
+            rotZ => ShowFaceIndices(ref _north[depth - (1+_localDepth)], rotZ, true, false, false, true),
+            rotZ => ShowFaceIndices(ref _west[width - (1+_localDepth)], rotZ, true, false, false, true),
+            rotZ => ShowFaceIndices(ref _west[_localDepth], rotZ),
+            rotZ => ShowFaceIndices(ref _down[height - (1+_localDepth)], rotZ, false, true, true),
+            rotZ => ShowFaceIndices(ref _down[_localDepth], rotZ)
         };
         
         var maxDot = -Mathf.Infinity;
@@ -258,9 +281,26 @@ public class Ore : MonoBehaviour
             maxDot = dot;
             bestFace = i;
         }
-    
-        Debug.Log("Face actuelle : " + faceNames[bestFace] + " rotation : "+transform.rotation.eulerAngles);
-        showFaces[bestFace]();
+
+        Vector3[] localRots =
+        {
+            new(0, 0, 0),
+            new(0, 180, 0),
+            new(0, 90, 0),
+            new(0, 270, 0),
+            new(270, 0, 0),
+            new(90, 0, 0),
+        };
+        var rotBase = Quaternion.Euler(localRots[bestFace]);
+        var rotSupplement = transform.rotation * Quaternion.Inverse(rotBase);
+        var rotFace = rotSupplement.eulerAngles.z;
+
+        int[] rotSign =
+        {
+            -1, 1, 1, -1, 0, -1
+        };
+        Debug.Log("Face : " + faceNames[bestFace] + ", rotFace : "+rotFace+", rotSign : "+rotSign[bestFace]+", rotSupp : "+rotSupplement.eulerAngles);
+        showFaces[bestFace](rotFace*rotSign[bestFace]);
     }
 
     public void DestroyAllCells()
