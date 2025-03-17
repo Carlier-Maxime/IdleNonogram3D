@@ -50,18 +50,22 @@ public class Ore : MonoBehaviour
     private TextMeshPro[] _lineTMP;
     private TextMeshPro[] _columnTMP;
     private int _localDepth = 0;
+    private Vector3 _startPos;
+    private float _defaultZ;
 
     private void Start()
     {
         if (!cellPrefab.GetComponent<Cell>()) Debug.LogError("The Prefab used not content a component Cell.");
-        
-        var startPosition = transform.position - new Vector3(ShiftOf(width), ShiftOf(height), ShiftOf(depth));
-        GenCells(startPosition);
+        _defaultZ = transform.localPosition.z;
+        _startPos = transform.position - new Vector3(ShiftOf(width), ShiftOf(height), ShiftOf(depth));
+        GenCells();
         InitializeFaceIndices();
-        InitializeTMP(startPosition);
+        InitializeTMP();
         ComputeFaceIndices();
-        DrawGrid(startPosition);
+        DrawGrid();
         ShowFaceIndices(ref _north[0], 0);
+        transform.position = new Vector3(transform.position.x, transform.position.y, _defaultZ-_localDepth);
+        UpdateShowCells();
         var rotateComponent = GetComponent<RotateBySwipe>();
         if (rotateComponent) rotateComponent.OnRotateFinish += OnRotateFinish;
         return;
@@ -71,7 +75,7 @@ public class Ore : MonoBehaviour
         static float ShiftOf(int x) => x/2 - ((x&1)==0 ? 0.5f : 0f);
     }
 
-    private void GenCells(Vector3 startPosition)
+    private void GenCells()
     {
         _cells = new Cell[width, height, depth];
         var seed = UnityEngine.Random.Range(0, 100000); // 60198
@@ -83,7 +87,7 @@ public class Ore : MonoBehaviour
             {
                 for (var z = 0; z < depth; z++)
                 {
-                    var spawnPosition = startPosition + new Vector3(x, y, z);
+                    var spawnPosition = _startPos + new Vector3(x, y, z);
                     _cells[x,y,z] = Instantiate(cellPrefab, spawnPosition, Quaternion.identity, transform).GetComponent<Cell>();
                     _cells[x,y,z].SetPure((noise.snoise(seedOffset + new float3(x, y, z))+1)*0.5f < density);
                 }
@@ -101,14 +105,14 @@ public class Ore : MonoBehaviour
         for (var i = 0; i < height; ++i) _down[i] = new FaceIndices(depth, width);
     }
 
-    private void InitializeTMP(Vector3 startPosition)
+    private void InitializeTMP()
     {
         _lineTMP = new TextMeshPro[height];
         for (var i = 0; i < height; ++i)
         {
             var newGameObject = new GameObject();
             _lineTMP[i] = newGameObject.AddComponent<TextMeshPro>();
-            _lineTMP[i].transform.position = startPosition + new Vector3(-1.5f, i, -0.5f);
+            _lineTMP[i].transform.position = _startPos + new Vector3(-1.5f, i, -0.5f);
             _lineTMP[i].text = "X X X";
             _lineTMP[i].alignment = TextAlignmentOptions.Center;
             _lineTMP[i].fontSize = 5;
@@ -119,7 +123,7 @@ public class Ore : MonoBehaviour
         {
             var newGameObject = new GameObject();
             _columnTMP[i] = newGameObject.AddComponent<TextMeshPro>();
-            _columnTMP[i].transform.position = startPosition + new Vector3(i, height+0.75f, -0.5f);
+            _columnTMP[i].transform.position = _startPos + new Vector3(i, height+0.75f, -0.5f);
             _columnTMP[i].text = "X\nX\nX";
             _columnTMP[i].alignment = TextAlignmentOptions.Center;
             _columnTMP[i].fontSize = 5;
@@ -175,7 +179,7 @@ public class Ore : MonoBehaviour
         }
     }
 
-    private void DrawGrid(Vector3 startPosition)
+    private void DrawGrid()
     {
         var lineRenderer = gameObject.AddComponent<LineRenderer>();
         lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
@@ -196,7 +200,7 @@ public class Ore : MonoBehaviour
             {
                 var i = x*2 + y;
                 var posY = ((x&1) == 0 ? y : 1-y)*height - 0.5f;
-                lineRenderer.SetPosition(i, startPosition + new Vector3(x-0.5f, posY, -0.6f));
+                lineRenderer.SetPosition(i, _startPos + new Vector3(x-0.5f, posY, -0.6f));
             }
         }
 
@@ -207,7 +211,7 @@ public class Ore : MonoBehaviour
             {
                 var i = offsetI + y*2 + x;
                 var posX = ((y&1) == 0 ? 1-x : x)*height - 0.5f;
-                lineRenderer.SetPosition(i, startPosition + new Vector3(posX, y-0.5f, -0.6f));
+                lineRenderer.SetPosition(i, _startPos + new Vector3(posX, y-0.5f, -0.6f));
             }
         }
     }
@@ -301,6 +305,23 @@ public class Ore : MonoBehaviour
         };
         Debug.Log("Face : " + faceNames[bestFace] + ", rotFace : "+rotFace+", rotSign : "+rotSign[bestFace]+", rotSupp : "+rotSupplement.eulerAngles);
         showFaces[bestFace](rotFace*rotSign[bestFace]);
+        UpdateShowCells();
+    }
+
+    private void UpdateShowCells()
+    {
+        for (var x = 0; x < width; ++x)
+        {
+            for (var y = 0; y < height; ++y)
+            {
+                for (var z = 0; z < depth; ++z)
+                {
+                    if (_cells[x, y, z] == null) continue;
+                    var cellPos = _cells[x, y, z].transform.position;
+                    _cells[x,y,z].gameObject.SetActive(cellPos.z > _startPos.z || Mathf.Approximately(_startPos.z, cellPos.z));
+                }
+            }
+        }
     }
 
     public void DestroyAllCells()
