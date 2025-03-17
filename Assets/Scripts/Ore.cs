@@ -49,6 +49,7 @@ public class Ore : MonoBehaviour
     private FaceIndices[] _up;
     private TextMeshPro[] _lineTMP;
     private TextMeshPro[] _columnTMP;
+    private int _localDepth = 0;
 
     private void Start()
     {
@@ -138,8 +139,8 @@ public class Ore : MonoBehaviour
         for (var x = 0; x < width; ++x)
         {
             var finalX = x;
-            ComputeIndicesLineOrColumn(height, depth, (minor, major) => _cells[finalX, minor, major].IsPure(), ref _west[x], false);
-            ComputeIndicesLineOrColumn(depth, height, (minor, major) => _cells[finalX, major, minor ].IsPure(), ref _west[x], true);
+            ComputeIndicesLineOrColumn(height, depth, (minor, major) => _cells[finalX, minor, major].IsPure(), ref _west[x], true);
+            ComputeIndicesLineOrColumn(depth, height, (minor, major) => _cells[finalX, major, minor ].IsPure(), ref _west[x], false);
         }
 
         for (var y = 0; y < height; y++)
@@ -237,7 +238,14 @@ public class Ore : MonoBehaviour
             Vector3.down
         };
         var faceNames = new[] { "North", "Sud", "Est", "West", "Up", "Down" };
-        var faces = new[] { _north, _north, _west, _west, _up, _up};
+        var faces = new[] {
+            _north[_localDepth],
+            _north[depth - (1+_localDepth)],
+            _west[width - (1+_localDepth)],
+            _west[_localDepth],
+            _up[_localDepth],
+            _up[height - (1+_localDepth)]
+        };
         
         var maxDot = -Mathf.Infinity;
         var bestFace = -1;
@@ -251,7 +259,7 @@ public class Ore : MonoBehaviour
         }
     
         Debug.Log("Face actuelle : " + faceNames[bestFace] + " rotation : "+transform.rotation.eulerAngles);
-        //ShowFaceIndices(ref faces[bestFace][0]);
+        ShowFaceIndices(ref faces[bestFace]);
     }
 
     public void DestroyAllCells()
