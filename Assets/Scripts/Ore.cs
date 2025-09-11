@@ -31,6 +31,9 @@ public class Ore : MonoBehaviour
         if (!cellPrefab.GetComponent<Cell>()) Debug.LogError("The Prefab used not content a component Cell.");
         _defaultZ = transform.localPosition.z;
         _startPos = transform.position - new Vector3(ShiftOf(width), ShiftOf(height), ShiftOf(depth));
+        var labelSize = 1.6f;
+        var maxLen = Math.Max(Math.Max(width, height), depth) + labelSize;
+        Player.P1.MoveForShowSouthFace(new Bounds(new Vector3(-labelSize/2, labelSize/2, 0), new Vector3(maxLen, maxLen, maxLen)));
         GenCells();
         InitializeFaceIndices();
         ComputeFaceIndices();
