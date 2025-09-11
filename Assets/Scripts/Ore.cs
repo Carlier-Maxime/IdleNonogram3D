@@ -1,33 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
-
-public class FaceIndices
-{
-    public FaceIndices(int nbLine, int nbColumn)
-    {
-        _lines = new List<int>[nbLine];
-        for (var i = 0; i < nbLine; i++) _lines[i] = new List<int>();
-        _columns = new List<int>[nbColumn];
-        for (var i = 0; i < nbColumn; i++) _columns[i] = new List<int>();
-    }
-    private List<int>[] _lines;
-    private List<int>[] _columns;
-
-    public ref List<int> GetLine(int i)
-    {
-        return ref _lines[i];
-    }
-    
-    public ref List<int> GetColumn(int i)
-    {
-        return ref _columns[i];
-    }
-}
 
 public class Ore : MonoBehaviour
 {
@@ -47,8 +21,7 @@ public class Ore : MonoBehaviour
     private FaceIndices[] _north;
     private FaceIndices[] _west;
     private FaceIndices[] _down;
-    private TextMeshPro[] _lineTMP;
-    private TextMeshPro[] _columnTMP;
+    private FaceIndicesLabelService _labels;
     private int _localDepth = 0;
     private Vector3 _startPos;
     private float _defaultZ;
@@ -60,10 +33,11 @@ public class Ore : MonoBehaviour
         _startPos = transform.position - new Vector3(ShiftOf(width), ShiftOf(height), ShiftOf(depth));
         GenCells();
         InitializeFaceIndices();
-        InitializeTMP();
         ComputeFaceIndices();
         DrawGrid();
-        ShowFaceIndices(ref _north[0], 0);
+        _labels = new FaceIndicesLabelService();
+        _labels.CreateOrUpdate(width, height, _startPos);
+        _labels.ShowFaceIndices(ref _north[0], 0);
         transform.position = new Vector3(transform.position.x, transform.position.y, _defaultZ-_localDepth);
         UpdateShowCells();
         var rotateComponent = GetComponent<RotateBySwipe>();
@@ -103,32 +77,6 @@ public class Ore : MonoBehaviour
         for (var i = 0; i < width; ++i) _west[i] = new FaceIndices(height, depth);
         _down = new FaceIndices[height];
         for (var i = 0; i < height; ++i) _down[i] = new FaceIndices(depth, width);
-    }
-
-    private void InitializeTMP()
-    {
-        _lineTMP = new TextMeshPro[height];
-        for (var i = 0; i < height; ++i)
-        {
-            var newGameObject = new GameObject();
-            _lineTMP[i] = newGameObject.AddComponent<TextMeshPro>();
-            _lineTMP[i].transform.position = _startPos + new Vector3(-1.5f, i, -0.5f);
-            _lineTMP[i].text = "X X X";
-            _lineTMP[i].alignment = TextAlignmentOptions.Center;
-            _lineTMP[i].fontSize = 5;
-            _lineTMP[i].color = Color.blue;
-        }
-        _columnTMP = new TextMeshPro[width];
-        for (var i = 0; i < height; ++i)
-        {
-            var newGameObject = new GameObject();
-            _columnTMP[i] = newGameObject.AddComponent<TextMeshPro>();
-            _columnTMP[i].transform.position = _startPos + new Vector3(i, height+0.75f, -0.5f);
-            _columnTMP[i].text = "X\nX\nX";
-            _columnTMP[i].alignment = TextAlignmentOptions.Center;
-            _columnTMP[i].fontSize = 5;
-            _columnTMP[i].color = Color.blue;
-        }
     }
 
     private void ComputeFaceIndices()
@@ -216,44 +164,6 @@ public class Ore : MonoBehaviour
         }
     }
 
-    private void ShowFaceIndices(ref FaceIndices face, float rotZ, bool inverseColumnOrder = false, bool reverseColumn = false, bool inverseLineOrder = false, bool reverseLine = false)
-    {
-        if (rotZ < 0) rotZ += 360;
-        bool shouldTranspose = false;
-        if (Math.Abs(90 - rotZ) < 1)
-        {
-            shouldTranspose = true;
-            inverseLineOrder = !inverseLineOrder;
-            reverseColumn = !reverseColumn;
-        }
-        if (Math.Abs(180-rotZ) < 1)
-        {
-            inverseColumnOrder = !inverseColumnOrder;
-            reverseColumn = !reverseColumn;
-            inverseLineOrder = !inverseLineOrder;
-            reverseLine = !reverseLine;
-        }
-        if (Math.Abs(270-rotZ) < 1)
-        {
-            shouldTranspose = true;
-            inverseColumnOrder = !inverseColumnOrder;
-            reverseLine = !reverseLine;
-        }
-        for (var x = 0; x < width; ++x)
-        {
-            var i = inverseColumnOrder ? width - (1 + x) : x;
-            ref var column = ref shouldTranspose ? ref face.GetLine(i) : ref face.GetColumn(i);
-            _columnTMP[x].text = string.Join('\n', reverseColumn ? column : column.AsEnumerable()!.Reverse());
-        }
-
-        for (var y = 0; y < height; ++y)
-        {
-            var i = inverseLineOrder ? height - (1 + y) : y;
-            ref var line = ref shouldTranspose ? ref face.GetColumn(i) : ref face.GetLine(i);
-            _lineTMP[y].text = string.Join(' ', reverseLine ? line.AsEnumerable()!.Reverse() : line);
-        }
-    }
-
     private void OnRotateFinish()
     {
         var cameraDir = (Player.P1.transform.position - transform.position).normalized;
@@ -267,12 +177,12 @@ public class Ore : MonoBehaviour
         };
         var faceNames = new[] { "North", "Sud", "Est", "West", "Up", "Down" };
         Action<float>[] showFaces = {
-            rotZ => ShowFaceIndices(ref _north[_localDepth], rotZ),
-            rotZ => ShowFaceIndices(ref _north[depth - (1+_localDepth)], rotZ, true, false, false, true),
-            rotZ => ShowFaceIndices(ref _west[width - (1+_localDepth)], rotZ, true, false, false, true),
-            rotZ => ShowFaceIndices(ref _west[_localDepth], rotZ),
-            rotZ => ShowFaceIndices(ref _down[height - (1+_localDepth)], rotZ, false, true, true),
-            rotZ => ShowFaceIndices(ref _down[_localDepth], rotZ)
+            rotZ => _labels.ShowFaceIndices(ref _north[_localDepth], rotZ),
+            rotZ => _labels.ShowFaceIndices(ref _north[depth - (1+_localDepth)], rotZ, true, false, false, true),
+            rotZ => _labels.ShowFaceIndices(ref _west[width - (1+_localDepth)], rotZ, true, false, false, true),
+            rotZ => _labels.ShowFaceIndices(ref _west[_localDepth], rotZ),
+            rotZ => _labels.ShowFaceIndices(ref _down[height - (1+_localDepth)], rotZ, false, true, true),
+            rotZ => _labels.ShowFaceIndices(ref _down[_localDepth], rotZ)
         };
         
         var maxDot = -Mathf.Infinity;
@@ -337,5 +247,10 @@ public class Ore : MonoBehaviour
                 }
             }
         }
+    }
+
+    private void OnDestroy()
+    {
+        _labels?.Dispose();
     }
 }
