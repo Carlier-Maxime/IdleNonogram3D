@@ -84,46 +84,22 @@ public class Ore : MonoBehaviour
         for (var z = 0; z < depth; ++z)
         {
             var finalZ = z;
-            ComputeIndicesLineOrColumn(height, width, (minor, major) => _cells[minor, major, finalZ].IsPure(), ref _north[z], false);
-            ComputeIndicesLineOrColumn(width, height, (minor, major) => _cells[major, minor, finalZ].IsPure(), ref _north[z], true);
+            _north[z].ComputeIndicesLineOrColumn(height, width, (minor, major) => _cells[minor, major, finalZ].IsPure(), false);
+            _north[z].ComputeIndicesLineOrColumn(width, height, (minor, major) => _cells[major, minor, finalZ].IsPure(), true);
         }
 
         for (var x = 0; x < width; ++x)
         {
             var finalX = x;
-            ComputeIndicesLineOrColumn(height, depth, (minor, major) => _cells[finalX, minor, major].IsPure(), ref _west[x], true, true);
-            ComputeIndicesLineOrColumn(depth, height, (minor, major) => _cells[finalX, major, minor ].IsPure(), ref _west[x], false, false, true);
+            _west[x].ComputeIndicesLineOrColumn(height, depth, (minor, major) => _cells[finalX, minor, major].IsPure(), true, true);
+            _west[x].ComputeIndicesLineOrColumn(depth, height, (minor, major) => _cells[finalX, major, minor ].IsPure(), false, false, true);
         }
 
         for (var y = 0; y < height; y++)
         {
             var finalY = y;
-            ComputeIndicesLineOrColumn(depth, width, (minor, major) => _cells[minor, finalY, major].IsPure(), ref _down[y], false, true);
-            ComputeIndicesLineOrColumn( width, depth, (minor, major) => _cells[major, finalY, minor].IsPure(), ref _down[y], true, false, true);
-        }
-    }
-
-    private void ComputeIndicesLineOrColumn(int majorSize, int minorSize, Func<int, int, bool> isPure, ref FaceIndices face, bool useColumn, bool inverseOrder = false, bool inverseMinor = false)
-    {
-        for (var major = 0; major < majorSize; ++major)
-        {
-            var index = inverseOrder ? majorSize - (1+major) : major;
-            ref var line = ref useColumn ? ref face.GetColumn(index) : ref face.GetLine(index);
-            var i = -1;
-            var oldPure = false;
-            for (var minor = 0; minor < minorSize; minor++)
-            {
-                var newPure = isPure(inverseMinor ? minorSize - (1+minor) : minor, major);
-                if (newPure)
-                {
-                    if (!oldPure)
-                    {
-                        ++i;
-                        line.Add(1);
-                    } else line[i]++;
-                }
-                oldPure = newPure;
-            }
+            _down[y].ComputeIndicesLineOrColumn(depth, width, (minor, major) => _cells[minor, finalY, major].IsPure(), false, true);
+            _down[y].ComputeIndicesLineOrColumn( width, depth, (minor, major) => _cells[major, finalY, minor].IsPure(), true, false, true);
         }
     }
 
