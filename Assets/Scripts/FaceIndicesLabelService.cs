@@ -10,6 +10,18 @@ public class FaceIndicesLabelService : IDisposable
     private TextMeshPro[] _lineTMP;
     private TextMeshPro[] _columnTMP;
 
+    private TextMeshPro CreateTMP()
+    {
+        var tmp = new GameObject().AddComponent<TextMeshPro>();
+        tmp.textWrappingMode = TextWrappingModes.NoWrap;
+        tmp.enableAutoSizing = true;
+        tmp.fontSizeMin = 2;
+        tmp.fontSizeMax = 8;
+        tmp.color = Color.blue;
+        tmp.GetComponentInParent<RectTransform>().sizeDelta = new Vector2(1f, 1f);
+        return tmp;
+    }
+
     public void CreateOrUpdate(int width, int height, Vector3 pos)
     {
         _width = width;
@@ -17,24 +29,20 @@ public class FaceIndicesLabelService : IDisposable
         _lineTMP = new TextMeshPro[height];
         for (var i = 0; i < height; ++i)
         {
-            var newGameObject = new GameObject();
-            _lineTMP[i] = newGameObject.AddComponent<TextMeshPro>();
-            _lineTMP[i].transform.position = pos + new Vector3(-1.5f, i, -0.5f);
-            _lineTMP[i].text = "X X X";
-            _lineTMP[i].alignment = TextAlignmentOptions.Center;
-            _lineTMP[i].fontSize = 5;
-            _lineTMP[i].color = Color.blue;
+            ref var tmp = ref _lineTMP[i];
+            tmp = CreateTMP();
+            tmp.transform.position = pos + new Vector3(-1.1f, i, -0.5f);
+            tmp.text = "X X X";
+            tmp.alignment = TextAlignmentOptions.Right;
         }
         _columnTMP = new TextMeshPro[width];
         for (var i = 0; i < height; ++i)
         {
-            var newGameObject = new GameObject();
-            _columnTMP[i] = newGameObject.AddComponent<TextMeshPro>();
-            _columnTMP[i].transform.position = pos + new Vector3(i, height+0.75f, -0.5f);
-            _columnTMP[i].text = "X\nX\nX";
-            _columnTMP[i].alignment = TextAlignmentOptions.Center;
-            _columnTMP[i].fontSize = 5;
-            _columnTMP[i].color = Color.blue;
+            ref var tmp = ref _columnTMP[i];
+            tmp = CreateTMP();
+            tmp.transform.position = pos + new Vector3(i, height+0.02f, -0.5f);
+            tmp.text = "X\nX\nX";
+            tmp.alignment = TextAlignmentOptions.Bottom;
         }
     }
     
