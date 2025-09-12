@@ -199,32 +199,20 @@ public class Ore : MonoBehaviour
 
     private void UpdateShowCells()
     {
-        for (var x = 0; x < width; ++x)
+        foreach (var cell in _cells)
         {
-            for (var y = 0; y < height; ++y)
-            {
-                for (var z = 0; z < depth; ++z)
-                {
-                    if (_cells[x, y, z] == null) continue;
-                    var cellPos = _cells[x, y, z].transform.position;
-                    _cells[x,y,z].gameObject.SetActive(cellPos.z > _startPos.z || Mathf.Approximately(_startPos.z, cellPos.z));
-                }
-            }
+            if (!cell) continue;
+            var z = cell.transform.position.z;
+            cell.gameObject.SetActive(z > _startPos.z || Mathf.Approximately(_startPos.z, z));
         }
     }
 
     public void DestroyAllCells()
     {
-        for (var x = 0; x < width; ++x)
+        foreach (var cell in _cells)
         {
-            for (var y = 0; y < height; ++y)
-            {
-                for (var z = 0; z < depth; ++z)
-                {
-                    if (_cells[x, y, z] == null) continue;
-                    _cells[x, y, z].DestroyCell(false);
-                }
-            }
+            if (!cell) continue;
+            cell.DestroyCell(false);
         }
     }
 
