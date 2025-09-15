@@ -449,6 +449,21 @@ MonoBehaviour:
   rotationSpeed: 180
   snapAngle: 90
   snapDuration: 0.1
+--- !u!114 &593983926
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 593983919}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6afc57c3311542979f33710f5c44d861, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GridRenderer
+  gridColor1: {r: 0, g: 0.2666664, b: 1, a: 0}
+  gridColor2: {r: 0, g: 0.73333335, b: 1, a: 0}
+  lineWidth: 0.075
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -570,6 +585,10 @@ PrefabInstance:
       propertyPath: cellPrefab
       value: 
       objectReference: {fileID: 8023811857703442212, guid: 8d1131bfb924ade438fb90b6ad784328, type: 3}
+    - target: {fileID: 3652239444829483354, guid: d335c423801f876458f4cedbca3a95a7, type: 3}
+      propertyPath: gridRenderer
+      value: 
+      objectReference: {fileID: 593983926}
     - target: {fileID: 8209035869252372924, guid: d335c423801f876458f4cedbca3a95a7, type: 3}
       propertyPath: rotationSpeed
       value: 0.5
@@ -581,6 +600,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2836579296697205522, guid: d335c423801f876458f4cedbca3a95a7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 593983923}
+    - targetCorrespondingSourceObject: {fileID: 2836579296697205522, guid: d335c423801f876458f4cedbca3a95a7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 593983926}
   m_SourcePrefab: {fileID: 100100000, guid: d335c423801f876458f4cedbca3a95a7, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

@@ -5,10 +5,10 @@ using UnityEngine;
 
 public class Ore : MonoBehaviour
 {
-    public Color gridColor1;
-    public Color gridColor2;
     [SerializeField]
     private GameObject cellPrefab;
+    [SerializeField]
+    private GridRenderer gridRenderer;
     [SerializeField]
     private int width = 5;
     [SerializeField]
@@ -29,6 +29,7 @@ public class Ore : MonoBehaviour
     private void Start()
     {
         if (!cellPrefab.GetComponent<Cell>()) Debug.LogError("The Prefab used not content a component Cell.");
+        if (!gridRenderer) Debug.LogError("The GridRenderer component is not found.");
         _defaultZ = transform.localPosition.z;
         _startPos = transform.position - new Vector3(ShiftOf(width), ShiftOf(height), ShiftOf(depth));
         var labelSize = 1.1f;
@@ -37,7 +38,7 @@ public class Ore : MonoBehaviour
         GenCells();
         InitializeFaceIndices();
         ComputeFaceIndices();
-        DrawGrid();
+        gridRenderer.DrawGrid(width, height, new Vector3(_startPos.x, _startPos.y, _startPos.z-0.6f));
         _labels = new FaceIndicesLabelService();
         _labels.CreateOrUpdate(width, height, _startPos);
         _labels.ShowFaceIndices(ref _north[0], 0);
@@ -103,43 +104,6 @@ public class Ore : MonoBehaviour
             var finalY = y;
             _down[y].ComputeIndicesLineOrColumn(depth, width, (minor, major) => _cells[minor, finalY, major].IsPure(), false, true);
             _down[y].ComputeIndicesLineOrColumn( width, depth, (minor, major) => _cells[major, finalY, minor].IsPure(), true, false, true);
-        }
-    }
-
-    private void DrawGrid()
-    {
-        var lineRenderer = gameObject.AddComponent<LineRenderer>();
-        lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
-        lineRenderer.colorGradient = new Gradient
-        {
-            colorKeys = new GradientColorKey[]
-            {
-                new(gridColor1, 0.0f),
-                new(gridColor2, 1.0f),
-            }
-        };
-        lineRenderer.startWidth = 0.05f;
-        lineRenderer.endWidth = 0.05f;
-        lineRenderer.positionCount = 2*(width+height)+3;
-        for (var x = 0; x <= width; ++x)
-        {
-            for (var y = 0; y < 2; ++y)
-            {
-                var i = x*2 + y;
-                var posY = ((x&1) == 0 ? y : 1-y)*height - 0.5f;
-                lineRenderer.SetPosition(i, _startPos + new Vector3(x-0.5f, posY, -0.6f));
-            }
-        }
-
-        var offsetI = 2*width+1;
-        for (var y = 0; y <= height; ++y)
-        {
-            for (var x = 0; x < 2; ++x)
-            {
-                var i = offsetI + y*2 + x;
-                var posX = ((y&1) == 0 ? 1-x : x)*height - 0.5f;
-                lineRenderer.SetPosition(i, _startPos + new Vector3(posX, y-0.5f, -0.6f));
-            }
         }
     }
 
