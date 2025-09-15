@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.Mathematics;
 using UnityEngine;
@@ -56,7 +57,7 @@ public class Ore : MonoBehaviour
     private void GenCells()
     {
         _cells = new Cell[width, height, depth];
-        var seed = UnityEngine.Random.Range(0, 100000); // 60198
+        var seed = UnityEngine.Random.Range(0, 100000); // 34185 | 60198
         Debug.Log("Ore seed : "+seed);
         var seedOffset = new float3(seed*0.01f, seed*0.01f, seed*0.01f);
         for (var x = 0; x < width; x++)
@@ -110,53 +111,39 @@ public class Ore : MonoBehaviour
     private void OnRotateFinish()
     {
         var cameraDir = (Player.P1.transform.position - transform.position).normalized;
-        var localNormals = new[] {
-            Vector3.back,
-            Vector3.forward,
-            Vector3.right,
-            Vector3.left,
-            Vector3.up,
-            Vector3.down
-        };
-        var faceNames = new[] { "North", "Sud", "Est", "West", "Up", "Down" };
-        Action<float>[] showFaces = {
-            rotZ => _labels.ShowFaceIndices(ref _north[_localDepth], rotZ),
-            rotZ => _labels.ShowFaceIndices(ref _north[depth - (1+_localDepth)], rotZ, true, false, false, true),
-            rotZ => _labels.ShowFaceIndices(ref _west[width - (1+_localDepth)], rotZ, true, false, false, true),
-            rotZ => _labels.ShowFaceIndices(ref _west[_localDepth], rotZ),
-            rotZ => _labels.ShowFaceIndices(ref _down[height - (1+_localDepth)], rotZ, false, true, true),
-            rotZ => _labels.ShowFaceIndices(ref _down[_localDepth], rotZ)
+        Dictionary<Face, Action<float>> showFaces = new()
+        {
+            { Face.North, rotZ => _labels.ShowFaceIndices(ref _north[_localDepth], rotZ) },
+            { Face.South, rotZ => _labels.ShowFaceIndices(ref _north[depth - (1 + _localDepth)], rotZ, true, false, false, true) },
+            { Face.East, rotZ => _labels.ShowFaceIndices(ref _west[width - (1 + _localDepth)], rotZ, true, false, false, true) },
+            { Face.West, rotZ => _labels.ShowFaceIndices(ref _west[_localDepth], rotZ) },
+            { Face.Up, rotZ => _labels.ShowFaceIndices(ref _down[height - (1 + _localDepth)], rotZ, false, true, true) },
+            { Face.Down, rotZ => _labels.ShowFaceIndices(ref _down[_localDepth], rotZ) }
         };
         
         var maxDot = -Mathf.Infinity;
-        var bestFace = -1;
-        for (var i = 0; i < localNormals.Length; i++)
+        var bestFace = Face.North;
+        foreach (Face face in Enum.GetValues(typeof(Face)))
         {
-            var worldNormal = transform.TransformDirection(localNormals[i]);
+            var worldNormal = transform.TransformDirection(FaceUtils.GetNormal(face));
             var dot = Vector3.Dot(worldNormal, cameraDir);
             if (dot <= maxDot) continue;
             maxDot = dot;
-            bestFace = i;
+            bestFace = face;
         }
 
-        Vector3[] localRots =
-        {
-            new(0, 0, 0),
-            new(0, 180, 0),
-            new(0, 90, 0),
-            new(0, 270, 0),
-            new(270, 0, 0),
-            new(90, 0, 0),
-        };
-        var rotBase = Quaternion.Euler(localRots[bestFace]);
-        var rotSupplement = transform.rotation * Quaternion.Inverse(rotBase);
+        var rotSupplement = transform.rotation * FaceUtils.GetInverseQuaternionRotation(bestFace);
         var rotFace = rotSupplement.eulerAngles.z;
-
-        int[] rotSign =
+        
+        Dictionary<Face, int> rotSign = new()
         {
-            -1, 1, 1, -1, 0, -1
+            { Face.North, -1 },
+            { Face.South, 1 },
+            { Face.East, 1 },
+            { Face.West, -1 },
+            { Face.Up, 0 },
+            { Face.Down, -1 }
         };
-        Debug.Log("Face : " + faceNames[bestFace] + ", rotFace : "+rotFace+", rotSign : "+rotSign[bestFace]+", rotSupp : "+rotSupplement.eulerAngles);
         showFaces[bestFace](rotFace*rotSign[bestFace]);
         UpdateShowCells();
     }
