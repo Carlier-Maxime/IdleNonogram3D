@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class FaceIndicesLabelService : IDisposable
 {
-    private int _width = 5;
-    private int _height = 5;
+    private int _width;
+    private int _height;
     private TextMeshPro[] _lineTMP;
     private TextMeshPro[] _columnTMP;
 
@@ -49,7 +49,7 @@ public class FaceIndicesLabelService : IDisposable
     public void ShowFaceIndices(ref FaceIndices face, float rotZ, bool inverseColumnOrder = false, bool reverseColumn = false, bool inverseLineOrder = false, bool reverseLine = false)
     {
         if (rotZ < 0) rotZ += 360;
-        bool shouldTranspose = false;
+        var shouldTranspose = false;
         if (Math.Abs(90 - rotZ) < 1)
         {
             shouldTranspose = true;
